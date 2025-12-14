@@ -130,6 +130,192 @@ function renderDetailOptions() {
     document.getElementById('syrup').checked = false;
     document.getElementById('quantityValue').textContent = 1;
 }
+
+function calculateDetailPrice() {
+    let price = currentCoffee.basePrice;
+
+    const sizeBtn = document.querySelector(`.size-btn[data-size="${currentSize}"]`);
+    if (sizeBtn) {
+        const m = sizeBtn.textContent.match(/\d+/);
+        if (m) price += parseInt(m[0]);
+    }
+
+    const milkBtn = document.querySelector(`.milk-btn[data-milk="${currentMilk}"]`);
+    if (milkBtn) {
+        const m = milkBtn.textContent.match(/\d+/);
+        if (m) price += parseInt(m[0]);
+    }
+
+    if (currentExtras.sugar) price += 20;
+    if (currentExtras.syrup) price += 30;
+
+    const total = price * currentQuantity;
+    document.getElementById('detailPrice').textContent = total;
+}
+
+function addToOrder() {
+    const orderItem = {
+        id: Date.now(),
+        coffeeId: currentCoffee.id,
+        name: currentCoffee.name,
+        size: currentSize,
+        milk: currentMilk,
+        extras: { ...currentExtras },
+        quantity: currentQuantity,
+        price: parseInt(document.getElementById('detailPrice').textContent)
+    };
+
+    const existingItem = order.find(item => 
+        item.coffeeId === orderItem.coffeeId &&
+        item.size === orderItem.size &&
+        item.milk === orderItem.milk &&
+        item.extras.sugar === orderItem.extras.sugar &&
+        item.extras.syrup === orderItem.extras.syrup
+    );
+    if (existingItem) {
+        existingItem.quantity += orderItem.quantity;
+    } else {
+        order.push(orderItem);
+    }
+
+    saveOrderToStorage();
+    updateOrderDisplay();
+    closeDetail();
+    alert(`${currentCoffee.name} добавлено в заказ!`);
+}
+
+function updateOrderDisplay() {
+    const totalItems = order.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = order.reduce((sum, item) => sum + item.price, 0);
+
+    document.getElementById('orderCountDisplay').textContent = totalItems;
+
+    if (order.length === 0) {
+        document.getElementById('orderItems').innerHTML = '<div class="empty-order">Заказ пуст</div>';
+    } else {
+        document.getElementById('orderItems').innerHTML = order.map(item => `
+            <div class="order-item">
+                <div class="order-item-info">
+                    <div class="order-item-name">${item.name}</div>
+                    <div class="order-item-details">
+                        ${item.size} | ${item.milk}
+                        ${item.extras.sugar ? '| Сахар' : ''}
+                        ${item.extras.syrup ? '| Сироп' : ''}
+                    </div>
+                    <div class="order-item-details">Кол-во: ${item.quantity}</div>
+                    <div class="order-item-price">${item.price} ₽</div>
+                </div>
+                <button class="order-item-remove" data-id="${item.id}">✕</button>
+            </div>
+        `).join('');
+
+        document.querySelectorAll('.order-item-remove').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const id = e.target.dataset.id;
+                order = order.filter(item => item.id != id);
+                saveOrderToStorage();
+                updateOrderDisplay();
+            });
+        });
+    }
+
+    document.getElementById('totalItems').textContent = totalItems;
+    document.getElementById('totalPrice').textContent = totalPrice + ' ₽';
+}
+
+function checkout() {
+    if (order.length === 0) {
+        alert('Заказ пуст!');
+        return;
+    }
+
+    const totalPrice = order.reduce((sum, item) => sum + item.price, 0);
+
+    alert(`Спасибо за заказ!\nИтого: ${totalPrice} ₽\nВаш заказ принят!`);
+
+    order = [];
+    saveOrderToStorage();
+    updateOrderDisplay();
+    document.getElementById('orderPanel').classList.remove('active');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadOrderFromStorage();
+    setupEventListeners();
+    filterAndRenderCoffee();
+    updateOrderDisplay();
+});
+
+function setupEventListeners() {
+    document.querySelectorAll('.coffee-type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.coffee-type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedType = btn.dataset.type;
+            filterAndRenderCoffee();
+        });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+        filterAndRenderCoffee(e.target.value);
+    });
+
+    document.getElementById('burgerMenu').addEventListener('click', toggleBurgerMenu);
+
+    document.getElementById('detailClose').addEventListener('click', closeDetail);
+    document.getElementById('detailCancelBtn').addEventListener('click', closeDetail);
+    document.getElementById('detailPage').addEventListener('click', e => {
+        if (e.target === document.getElementById('detailPage')) closeDetail();
+    });
+
+    document.getElementById('sizeButtons').addEventListener('click', e => {
+        if (e.target.classList.contains('size-btn')) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentSize = e.target.dataset.size;
+            calculateDetailPrice();
+        }
+    });
+
+    document.getElementById('milkButtons').addEventListener('click', e => {
+        if (e.target.classList.contains('milk-btn')) {
+            document.querySelectorAll('.milk-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentMilk = e.target.dataset.milk;
+            calculateDetailPrice();
+        }
+    });
+
+    document.getElementById('sugarCheckbox').addEventListener('change', e => {
+        currentExtras.sugar = e.target.checked;
+        calculateDetailPrice();
+    });
+
+    document.getElementById('syrup').addEventListener('change', e => {
+        currentExtras.syrup = e.target.checked;
+        calculateDetailPrice();
+    });
+
+    document.getElementById('quantityPlus').addEventListener('click', () => {
+        currentQuantity++;
+        document.getElementById('quantityValue').textContent = currentQuantity;
+        calculateDetailPrice();
+    });
+
+    document.getElementById('quantityMinus').addEventListener('click', () => {
+        if (currentQuantity > 1) {
+            currentQuantity--;
+            document.getElementById('quantityValue').textContent = currentQuantity;
+            calculateDetailPrice();
+        }
+    });
+
+    document.getElementById('addToOrderBtn').addEventListener('click', addToOrder);
+    document.getElementById('orderStatusBtn').addEventListener('click', toggleOrderPanel);
+    document.getElementById('orderPanelClose').addEventListener('click', toggleOrderPanel);
+    document.getElementById('checkoutBtn').addEventListener('click', checkout);
+}
+
 const coffeeData = [
     {
         id: 1,
