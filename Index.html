@@ -3,9 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Coffee House</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234A2C2A'><path d='M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.9 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z'/></svg>" type="image/svg+xml">
+    <link rel="stylesheet" href="Style.css">
 </head>
 <body>
+    <header>
+        <div class="header-container">
+            <a href="#" class="logo">Coffee House</a>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Поиск кофе...">
+            </div>
+
+            <div class="header-actions">
+                <div class="order-status" id="orderStatusBtn">
+                    <span>🛒</span>
+                    <span id="orderCountDisplay">0</span>
+                </div>
+                <div class="burger-menu" id="burgerMenu">
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <aside class="coffee-filters-sidebar">
+            <h3 class="coffee-types-title">Выберите тип кофе</h3>
+            <nav class="coffee-types-nav" id="coffeeTypesNav">
+                <button class="coffee-type-btn active" data-type="all">Все</button>
+                <button class="coffee-type-btn" data-type="cappuccino">Капучино</button>
+                <button class="coffee-type-btn" data-type="latte">Латте</button>
+                <button class="coffee-type-btn" data-type="americano">Американо</button>
+                <button class="coffee-type-btn" data-type="espresso">Эспрессо</button>
+                <button class="coffee-type-btn" data-type="flatwhite">Флэт Уайт</button>
+            </nav>
+        </aside>
+
+        <div class="content-wrapper">
+            <div class="coffee-types-slider-wrapper">
+                <div class="coffee-types-slider" id="coffeeTypesSlider">
+                    <button class="coffee-type-btn active" data-type="all">Все</button>
+                    <button class="coffee-type-btn" data-type="cappuccino">Капучино</button>
+                    <button class="coffee-type-btn" data-type="latte">Латте</button>
+                    <button class="coffee-type-btn" data-type="americano">Американо</button>
+                    <button class="coffee-type-btn" data-type="espresso">Эспрессо</button>
+                    <button class="coffee-type-btn" data-type="flatwhite">Флэт Уайт</button>
+                </div>
+            </div>
+
+            <div class="coffee-grid" id="coffeeGrid"></div>
+        </div>
+    </main>
+
+    <div class="detail-page" id="detailPage">
+        <div class="detail-modal">
+            <span class="detail-close" id="detailClose">&times;</span>
+            
+            <img src="" alt="" class="detail-image" id="detailImage">
+            <h2 class="detail-title" id="detailTitle"></h2>
+            <p class="detail-desc" id="detailDesc"></p>
+
+            <div class="detail-section">
+                <div class="detail-section-title">Размер</div>
+                <div class="size-buttons" id="sizeButtons"></div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-section-title">Тип молока</div>
+                <div class="milk-buttons" id="milkButtons"></div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-section-title">Дополнительно</div>
+                <div>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <input type="checkbox" id="sugarCheckbox"> Сахар (+20 ₽)
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="syrup"> Сироп (+30 ₽)
+                    </label>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-section-title">Количество</div>
+                <div class="quantity-control">
+                    <button class="quantity-btn" id="quantityMinus">−</button>
+                    <div class="quantity-value" id="quantityValue">1</div>
+                    <button class="quantity-btn" id="quantityPlus">+</button>
+                </div>
+            </div>
+
+            <div class="detail-price">
+                <span>Итого: </span>
+                <span id="detailPrice">0</span> ₽
+            </div>
+
+            <div class="detail-actions">
+                <button class="btn-primary" id="addToOrderBtn">Добавить в заказ</button>
+                <button class="btn-secondary" id="detailCancelBtn">Отмена</button>
+            </div>
+        </div>
+    </div>
     
+    <div class="order-panel" id="orderPanel">
+        <div class="order-panel-header">
+            Мой заказ
+            <button class="order-panel-close" id="orderPanelClose">✕</button>
+        </div>
+
+        <div class="order-items" id="orderItems">
+            <div class="empty-order">Заказ пуст</div>
+        </div>
+
+        <div class="order-summary">
+            <div class="order-total-row">
+                <span>Товаров:</span>
+                <span id="totalItems">0</span>
+            </div>
+            <div class="order-total-final">
+                <span>Итого:</span>
+                <span id="totalPrice">0 ₽</span>
+            </div>
+        </div>
+
+        <div class="order-checkout">
+            <button class="checkout-btn" id="checkoutBtn">Оформить заказ</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
