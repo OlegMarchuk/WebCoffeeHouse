@@ -150,7 +150,7 @@ function calculateDetailPrice() {
     if (currentExtras.syrup) price += 30;
 
     const total = price * currentQuantity;
-    document.getElementById('detailPrice').textContent = total;
+    document.getElementById('detailPrice').textContent = total * 0.9;
 }
 
 function addToOrder() {
